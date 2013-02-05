@@ -1,0 +1,29 @@
+{
+  "barclamp": {
+    "name": "dns",
+    "display": "DNS",
+    "version": 0,
+    "member": [
+      "crowbar"
+    ]
+  },
+  "crowbar": {
+    "layout": 1.9,
+    "order": 30,
+    "run_order": 30,
+    "chef_order": 30
+  },
+  "debs": {
+    "pkgs": [
+      "bind9",
+      "bind9utils"
+    ]
+  },
+  "rpms": {
+    "pkgs": [
+      "bind",
+      "bind-utils"
+    ]
+  },
+  "id": "dns"
+}

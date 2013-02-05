@@ -1,0 +1,59 @@
+{
+  "barclamp": {
+    "name": "deployer",
+    "display": "Deployer",
+    "version": 0,
+    "member": [
+      "crowbar"
+    ]
+  },
+  "crowbar": {
+    "layout": 1.9,
+    "order": 10,
+    "run_order": 10,
+    "chef_order": 10
+  },
+  "debs": {
+    "build_pkgs": [
+      "build-essential",
+      "make",
+      "flex",
+      "bison"
+    ],
+    "pkgs": [
+      "tcpdump"
+    ]
+  },
+  "rpms": {
+    "redhat-6.2": {
+      "build_pkgs": [
+        "tar"
+      ]
+    },
+    "centos-6.2": {
+      "build_pkgs": [
+        "tar"
+      ]
+    },
+    "build_pkgs": [
+      "flex",
+      "bison",
+      "make",
+      "kernel-devel",
+      "gcc",
+      "glibc-devel"
+    ],
+    "pkgs": [
+      "tcpdump"
+    ]
+  },
+  "gems": {
+    "pkgs": [
+      "xml-simple",
+      "libxml-ruby",
+      "cstruct"
+    ]
+  },
+  "build_cmd": "build.sh",
+  "id": "deployer"
+}

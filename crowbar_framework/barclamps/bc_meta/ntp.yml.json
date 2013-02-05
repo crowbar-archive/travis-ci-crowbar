@@ -1,0 +1,27 @@
+{
+  "barclamp": {
+    "name": "ntp",
+    "display": "NTP",
+    "version": 0,
+    "member": [
+      "crowbar"
+    ]
+  },
+  "crowbar": {
+    "layout": 1.9,
+    "order": 50,
+    "run_order": 50,
+    "chef_order": 50
+  },
+  "debs": {
+    "pkgs": [
+      "ntp"
+    ]
+  },
+  "rpms": {
+    "pkgs": [
+      "ntp"
+    ]
+  },
+  "id": "ntp"
+}

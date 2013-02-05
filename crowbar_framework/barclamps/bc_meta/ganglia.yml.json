@@ -1,0 +1,137 @@
+{
+  "barclamp": {
+    "name": "ganglia",
+    "display": "Ganglia",
+    "version": 0,
+    "member": [
+      "crowbar"
+    ]
+  },
+  "crowbar": {
+    "layout": 1.9,
+    "order": 100,
+    "run_order": 70,
+    "chef_order": 1040
+  },
+  "debs": {
+    "pkgs": [
+      "ganglia-monitor",
+      "gmetad",
+      "ganglia-webfrontend"
+    ]
+  },
+  "rpms": {
+    "pkgs": [
+      "libconfuse"
+    ],
+    "redhat-5.7": {
+      "pkgs": [
+        "php",
+        "php-gd"
+      ],
+      "build_pkgs": [
+        "rrdtool-devel",
+        "apr-devel",
+        "libpng-devel",
+        "libart_lgpl-devel",
+        "libconfuse-devel",
+        "expat-devel",
+        "python-devel",
+        "freetype-devel",
+        "pcre-devel",
+        "make",
+        "rpm-build"
+      ],
+      "pkg_sources": [
+        "http://mirror.its.sfu.ca/mirror/fedora/linux/releases/15/Everything/source/SRPMS/ganglia-3.1.7-3.fc15.src.rpm"
+      ],
+      "build_cmd": "build.sh"
+    },
+    "redhat-5.6": {
+      "pkgs": [
+        "php",
+        "php-gd"
+      ],
+      "build_pkgs": [
+        "rrdtool-devel",
+        "apr-devel",
+        "libpng-devel",
+        "libart_lgpl-devel",
+        "libconfuse-devel",
+        "expat-devel",
+        "python-devel",
+        "freetype-devel",
+        "pcre-devel",
+        "make",
+        "rpm-build"
+      ],
+      "pkg_sources": [
+        "http://mirror.its.sfu.ca/mirror/fedora/linux/releases/15/Everything/source/SRPMS/ganglia-3.1.7-3.fc15.src.rpm"
+      ],
+      "build_cmd": "build.sh"
+    },
+    "centos-5.7": {
+      "pkgs": [
+        "php",
+        "php-gd"
+      ],
+      "build_pkgs": [
+        "rrdtool-devel",
+        "apr-devel",
+        "libpng-devel",
+        "libart_lgpl-devel",
+        "libconfuse-devel",
+        "expat-devel",
+        "python-devel",
+        "freetype-devel",
+        "pcre-devel",
+        "make",
+        "rpm-build"
+      ],
+      "pkg_sources": [
+        "http://mirror.its.sfu.ca/mirror/fedora/linux/releases/15/Everything/source/SRPMS/ganglia-3.1.7-3.fc15.src.rpm"
+      ],
+      "build_cmd": "build.sh"
+    },
+    "centos-5.6": {
+      "pkgs": [
+        "php",
+        "php-gd"
+      ],
+      "build_pkgs": [
+        "rrdtool-devel",
+        "apr-devel",
+        "libpng-devel",
+        "libart_lgpl-devel",
+        "libconfuse-devel",
+        "expat-devel",
+        "python-devel",
+        "freetype-devel",
+        "pcre-devel",
+        "make",
+        "rpm-build"
+      ],
+      "pkg_sources": [
+        "http://mirror.its.sfu.ca/mirror/fedora/linux/releases/15/Everything/source/SRPMS/ganglia-3.1.7-3.fc15.src.rpm"
+      ],
+      "build_cmd": "build.sh"
+    },
+    "redhat-6.2": {
+      "pkgs": [
+        "ganglia",
+        "ganglia-gmond",
+        "ganglia-web",
+        "ganglia-gmetad"
+      ]
+    },
+    "centos-6.2": {
+      "pkgs": [
+        "ganglia",
+        "ganglia-gmond",
+        "ganglia-web",
+        "ganglia-gmetad"
+      ]
+    }
+  },
+  "id": "ganglia"
+}
