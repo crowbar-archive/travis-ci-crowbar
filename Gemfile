@@ -72,3 +72,6 @@ gem "launchy", ">= 2.1.0", :group => [:development, :test]
 
 # To use debugger
 # gem 'debugger'
+
+# DO NOT DELETE OR ALTER THIS LINE - it is for engine mounts
+gem "barclamp_logging", :path => "/tmp/crowbar-dev-test/barclamps/logging/crowbar_engine/barclamp_logging"

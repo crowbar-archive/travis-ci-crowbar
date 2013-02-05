@@ -13,7 +13,7 @@
 # limitations under the License. 
 # 
 
-class LoggingService < ServiceObject
+class BarclampLogging::LoggingService < ServiceObject
 
   def transition(inst, name, state)
     @logger.debug("Logging transition: entering: #{name} for #{state}")
