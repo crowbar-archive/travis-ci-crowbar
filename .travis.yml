@@ -4,3 +4,11 @@ rvm:
   - 1.9.3
 bundler_args: --without development
 script: 'cd crowbar_framework && bundle exec rake db:drop db:migrate db:fixtures:dump test:units spec'
+notifications:
+  email:
+    - crowbar@dell.com
+  irc:
+    on_success: change
+    on_failure: always
+    channels:
+      - irc.freenode.org#crowbar
