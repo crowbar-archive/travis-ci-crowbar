@@ -38,7 +38,23 @@
         "deb http://apt.opscode.com/ precise-0.10 main"
       ]
     },
+    "required_pkgs": [
+      "ruby1.9.1",
+      "ruby1.9.1-dev",
+      "gcc",
+      "rubygems",
+      "tcpdump",
+      "libcurl4-gnutls-dev",
+      "build-essential",
+      "libxml2-dev",
+      "zlib1g-dev",
+      "nginx",
+      "ipmitool",
+      "efibootmgr"
+    ],
     "build_pkgs": [
+      "ruby1.9.1",
+      "rubygems",
       "ruby1.9.1-dev",
       "build-essential",
       "libsqlite3-dev",
@@ -68,7 +84,6 @@
       "sqlite",
       "sqlite3",
       "libsqlite3-dev",
-      "libshadow-ruby1.8",
       "chef",
       "chef-server",
       "chef-server-webui",
@@ -85,13 +100,9 @@
       "openssh-server",
       "markdown",
       "rabbitmq-server",
-      "ruby1.8",
-      "ruby1.8-dev",
       "ruby1.9.1",
       "ruby1.9.1-dev",
-      "ruby-dev",
       "rubygems",
-      "rubygems1.8",
       "runit",
       "dpkg-dev",
       "screen",
@@ -129,6 +140,18 @@
         "zlib-devel"
       ]
     },
+    "required_pkgs": [
+      "install",
+      "rubygems",
+      "gcc",
+      "make",
+      "ruby-devel",
+      "libxml2-devel",
+      "zlib-devel",
+      "tcpdump",
+      "nginx",
+      "efibootmgr"
+    ],
     "build_pkgs": [
       "rubygems",
       "ruby-devel",
