@@ -13,16 +13,16 @@
 % limitations under the License. 
 % 
 -module(crowbar_rest).
--export([step/3, g/1, validate_core/1, validate/1, inspector/2]).
+-export([step/3, g/1, validate_core/1, validate/1, api_wrapper/1, api_wrapper_raw/1, api_wrapper/2, inspector/2]).
 -export([get_id/2, get_id/3, create/3, create/4, create/5, create/6, destroy/3]).
 -import(bdd_utils).
 -import(json).
+-include("bdd.hrl").
 
 g(Item) ->
   case Item of
     _ -> crowbar:g(Item)
   end.
-
 % validates JSON in a generic way common to all objects
 validate_core(JSON) ->
   R = [bdd_utils:is_a(JSON, string, created_at), % placeholder for createdat
@@ -38,11 +38,32 @@ validate(JSON) ->
        validate_core(JSON)],
   bdd_utils:assert(R, debug). 
 
+api_wrapper_raw(J) ->  
+  JSON = json:parse(J),
+  api_wrapper(JSON).
+api_wrapper(JSON) ->  
+  Type = json:keyfind(JSON, "type"),
+  api_wrapper(Type, JSON).
+api_wrapper(not_found, JSON) -> #item{data=JSON};
+api_wrapper(Type, JSON) when is_list(Type) 
+                             -> api_wrapper(list_to_atom(Type), JSON);
+api_wrapper(Type, JSON)      ->
+  Link = json:keyfind(JSON, "link"),
+  List = json:keyfind(JSON, "list"),
+  case List of
+    not_found -> #item{type=Type, data=json:keyfind(JSON, "item"), link=Link};
+    [[]]      -> #list{type=Type, data=[], link=Link, ids=[], count=0};
+    _         -> IDs = [{json:keyfind(R,"id"),json:keyfind(R,"name")} || R <- List],
+                % note: the ids field is for backward compatability against the legacy 2.0 api
+                 #list{type=Type, data=List, link=Link, count=json:keyfind(JSON, "count"), ids = IDs}
+  end.
+
 % Common Routine - returns a list of items from the system, used for house keeping
 inspector(Config, Feature) ->
   Raw = eurl:get(Config, apply(Feature, g, [path])),
   JSON = json:parse(Raw),
-  [{Feature, ID, Name} || {ID, Name} <- JSON].
+  List = api_wrapper(JSON),
+  [{Feature, ID, Name} || {ID, Name} <- List#list.data].
   
 % given a path + key, returns the ID of the object
 get_id(Config, Path, Key) -> 
@@ -91,6 +112,15 @@ step(Config, _Global, {step_given, _N, ["there is a",Category,"group",Group]}) -
 step(Config, _Given, {step_finally, _N, ["throw away group",Group]}) -> 
   bdd_restrat:destroy(Config, groups:g(path), Group);
 
+% ============================  WHEN STEPS =========================================
+
+step(Config, _Given, {step_when, {_Scenario, _N}, ["REST gets the",barclamp,Barclamp,Resource,"list"]}) -> 
+  Path = eurl:path([Barclamp,g(version),apply(bdd_restrat:alias(Resource),g,[resource])]),
+  bdd_utils:log(debug, crowbar, step, "REST get ~p list for ~p barclamp", [Resource, Barclamp]),
+  {Code, JSON} = eurl:get_page(Config, Path, all),
+  Wrapper = crowbar_rest:api_wrapper_raw(JSON),
+  bdd_utils:log(trace, bdd_restrat, step, "REST get ~p list: ~p", [Resource, Wrapper]),
+  bdd_restrat:ajax_return(Path, get, Code, Wrapper#list.ids);  
 
 % ============================  THEN STEPS =========================================
 

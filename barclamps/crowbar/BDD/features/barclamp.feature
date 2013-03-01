@@ -1,30 +1,29 @@
-Feature: Barclamps API
+Feature: Barclamp UI
   In order setup the sytem
   The system operator, Oscar
   wants to be able to select barclamps
 
-  Scenario: Barclamps List
-    When REST gets the {object:barclamp} list
-    Then there should be a value "crowbar"
-      And there should be a value "network"
-      And there should be a value "provisioner"
-
-  Scenario: REST JSON check
-    When REST gets the {object:barclamp} "crowbar"
-    Then the {object:barclamp} is properly formatted
-    
-  Scenario: REST Cannot Delete
-    When REST deletes the {object:barclamp} "crowbar"
-    Then I get a {integer:405} error
-  
-  Scenario: REST Cannot Update
-    When REST updates the {object:barclamp} "crowbar"
-    Then I get a {integer:405} error
-
-  Scenario: REST Get 404
-    When REST gets the {object:barclamp} "thisdoesnotexist"
-    Then I get a {integer:404} error
-    
-  Scenario: REST Cannot Create
-    When REST creates the {object:barclamp} "foo"
-    Then I get a {integer:405} error
+  Scenario: Basic Screen
+    When I go to the "barclamp" page
+    Then I should see a heading {bdd:crowbar.i18n.barclamp.index.title}
+      And I should see {bdd:crowbar.i18n.all}
+      And I should see "Name"
+      And I should see "Description"
+      And I should see "Crowbar"
+      And I should see "Deployer"
+      And I should see "Provisioner"
+      And I should see "polling is disabled"
+      And there should be no translation errors
+      
+  Scenario: Modules Screen
+    When I go to the "barclamp/crowbar" page
+    Then I should see {bdd:crowbar.i18n.barclamp.index.members}
+      And I should see {bdd:crowbar.i18n.all}
+      And I should see "Name"
+      And I should see "Description"
+      And I should see "Crowbar"
+      And I should see "Deployer"
+      And I should see "Provisioner"
+      And I should see "polling is disabled"
+      And there should be no translation errors
+      

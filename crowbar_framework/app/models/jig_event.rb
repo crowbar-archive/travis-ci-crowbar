@@ -16,10 +16,9 @@ class JigEvent < ActiveRecord::Base
   attr_accessible :name, :description, :order, :type
   attr_accessible :status, :jig_id
 
-  #!!! needs to be updated!!!
-  belongs_to :proposal_config  # the configuration this event will apply
+  belongs_to      :snapshot  # the deployment this event will apply
 
-  belongs_to      :jig  # the Jig instance this event is being handled by
+  belongs_to      :jig  # the Jig snapshot this event is being handled by
   has_many        :jig_runs,     :dependent => :destroy
   alias_attribute :runs, :jig_runs
 

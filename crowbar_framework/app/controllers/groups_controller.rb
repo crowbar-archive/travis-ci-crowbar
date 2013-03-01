@@ -1,4 +1,4 @@
-# Copyright 2012, Dell
+# Copyright 2013, Dell
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,83 +14,62 @@
 #
 #
 class GroupsController < ApplicationController
-
-  # POST to add a node to the group
-  def node_action
-    @group = Group.find_key params[:id]
-    unless @group
-      render :json => {:error=>I18n.t('api.not_found', :type=>'Group', :id=>params[:id])}, :status => 404
-      return
-    else
-      unless request.get?
-        @node = Node.find_key params[:node]
-        unless @node
-          render :json => {:error=>I18n.t('api.not_found', :type=>'Node', :id=>params[:node])}, :status => 404
-          return
-        else
-          if request.post?
-            @group.nodes << @node unless @group.nodes.include? @node
-          elsif request.put?
-            category = @group.category
-            @node.groups.each { |g| g.nodes.delete(@node) if g.category.eql?(category) }
-            @node.groups << @group unless @group.nodes.include? @node
-          elsif request.delete?
-            @group.nodes.delete(@node) if @group.nodes.include? @node
-          end
-        end
-      end
-      result = {}
-      @group.nodes.each { |n| result[n.id] = n.name }
-      render :json => {:id=>@group.id, :name=>@group.name, :category=>@group.category, :nodes=>result}
-    end
+  
+  def nodes
+    g = Group.find_key params[:id]
+    render api_index :nodes, g.nodes
   end
 
-  # GET 2.0/crowbar/2.0/group
   def index
-    @groups = {}
-    Group.all.each { |g| @groups[g.id]=g.name }
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render :json => @groups }
-    end    
-  end
-  
-  # GET 2.0/crowbar/2.0/group/1
-  # GET 2.0/crowbar/2.0/group/name
-  def show
-    @group = Group.find_key params[:id]
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render :json => @group }
+    if params.has_key? :node_id
+      n = Node.find_key params[:node_id]
+      render api_index :node, n.groups
+    else
+      render api_index :group, Group.all
     end
   end
 
-  # RESTful delete of the node
-  def destroy
-    if request.delete?
-      target = Group.find_key(params[:id])
-      if target.nil?
-        render :text=>"Could not find group '#{params[:id]}'", :status => 404
-      else
-        if Group.delete(target.id) > 0
-          render :text => "Group #{params[:id]} deleted!"
-        else
-          render :text=>"Could not delete group '#{params[:id]}'", :status => 500
-        end
-      end
+  def show
+    if params.has_key? :node_id
+      # this should use the _path
+      redirect_to groups_path(:id=>params[:id])
     else
-      throw "HTTP DELETE required to complete this action"
+      render api_show :group, Group
     end
   end
   
-  # RESTful create
   def create
-    if request.post?
-      @group = Group.create! params
-      render :json => @group
+    if params.has_key? :node_id
+      render api_not_supported 'put', 'nodes/:id/groups/:id'
     else
-      throw "HTTP POST required to compelte this action"
+      g = Group.create params
+      render api_show :group, Group, nil, nil, g
     end
   end
+  
+  def update
+    if params.has_key? :node_id
+      # TODO this needs to be restricted to the node only
+      g = Group.find_key params[:id]
+      n = Node.find_key params[:node_id]
+      n.groups << g  if g and n
+      render :text=>I18n.t('api.added', :item=>g.name, :collection=>'node.groups')
+    else  
+      render api_update :group, Group
+    end
+  end
+
+  def destroy
+    if params.has_key? :node_id
+      # TODO this needs to be restricted to the node only
+      g = Group.find_key params[:id]
+      n = Node.find_key params[:node_id]
+      g.nodes.delete(n) if g.nodes.include? n
+      render :text=>I18n.t('api.removed', :item=>'node', :collection=>'group')
+    else
+      render api_delete Group
+    end
+  end
+
   
 end
