@@ -51,6 +51,7 @@ en:
   maybe: Maybe
   chuck_norris: Die!!!
   depricated: "WARNING Depricated!"
+  work_in_progress: "Work in progress notice: %{message}"
   updating: Updating...
   note: Note
   hint: Hint
@@ -60,6 +61,7 @@ en:
   next: Next
   prev: Previous
   export: Export
+  default: Default
   
   test:
     verify: "Affirmative"
@@ -69,6 +71,8 @@ en:
     not_found: "Could not find %{type} with id %{id}."
     not_supported: "Requested action %{verb} is not supported on %{obj}"
     deleted: "Successfully deleted %{obj} id %{id}."
+    removed: "Successfully removed %{item} from %{collection}."
+    added: "Successfully added %{item} to %{collection}."
     unknown_request: "Unable to process request"
     by_id_or_username_record_not_found: "User not found with id/username %{id_username} not found"    
     
@@ -79,4 +83,5 @@ en:
     fqdn: "Item must be a fully qualified domain name (FQDN) such as 'server.example.com'."
     group_category: "Group Model Validation Error: type is not an allowed category"
     barclamp_excludes: "Barclamp name is reserved for Crowbar internal operations"
+    config_excludes: "Config name 'template' is reserved for Crowbar internal operations"
     not_in_set: "Object %{obj} property %{prop} can only take one of [%{set}]."

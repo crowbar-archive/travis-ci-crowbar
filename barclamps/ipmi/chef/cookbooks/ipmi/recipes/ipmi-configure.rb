@@ -42,27 +42,28 @@ bmc_vlan     = if bmc_use_vlan
                  "off"
                end
 
-node["crowbar_wall"] = {} if node["crowbar_wall"].nil?
-node["crowbar_wall"]["status"] = {} if node["crowbar_wall"]["status"].nil?
+node.set["crowbar_wall"] = {} if node["crowbar_wall"].nil?
+node.set["crowbar_wall"]["status"] = {} if node["crowbar_wall"]["status"].nil?
 if node["crowbar_wall"]["status"]["ipmi"].nil?
-  node["crowbar_wall"]["status"]["ipmi"] = {}
-  node["crowbar_wall"]["status"]["ipmi"]["user_set"] = false
-  node["crowbar_wall"]["status"]["ipmi"]["address_set"] = false
+  node.set["crowbar_wall"]["status"]["ipmi"] = {}
+  node.set["crowbar_wall"]["status"]["ipmi"]["user_set"] = false
+  node.set["crowbar_wall"]["status"]["ipmi"]["address_set"] = false
   node.save
 end
 
-unsupported = [ "KVM", "Bochs", "VMWare Virtual Platform", "VMware Virtual Platform", "VirtualBox" ]
+unsupported = [ "KVM", "Bochs", "VMWare Virtual Platform", "VMware Virtual Platform", "VirtualBox", "Unknown" ]
 
 if node[:ipmi][:bmc_enable]
-  if unsupported.member?(node[:dmi][:system][:product_name])
-    node["crowbar_wall"]["status"]["ipmi"]["messages"] = [ "Unsupported platform: #{node[:dmi][:system][:product_name]} - turning off ipmi for this node" ]
-    node[:ipmi][:bmc_enable] = false
+  platform = (node[:dmi][:system][:product_name] rescue "Unknown")
+  if unsupported.member?(platform)
+    node.set["crowbar_wall"]["status"]["ipmi"]["messages"] = [ "Unsupported platform: #{node[:dmi][:system][:product_name]} - turning off ipmi for this node" ]
+    node.set[:ipmi][:bmc_enable] = false
     node.save
     return
   end
 
   unless (node["crowbar_wall"]["status"]["ipmi"]["address_set"] and node["crowbar_wall"]["status"]["ipmi"]["user_set"])
-    node["crowbar_wall"]["status"]["ipmi"]["messages"] = []
+    node.set["crowbar_wall"]["status"]["ipmi"]["messages"] = []
     node.save
 
     ipmi_load "ipmi_load" do

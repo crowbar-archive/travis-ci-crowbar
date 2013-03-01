@@ -16,7 +16,6 @@
 # application code loads, so keep this block at the top.
 if RUBY_VERSION != '1.8.7'
   require 'simplecov'
-  SimpleCov.start
 end
 
 ENV["RAILS_ENV"] = "test"
@@ -58,5 +57,10 @@ class ActiveSupport::TestCase
   fixtures :all
   
   # Add more helper methods to be used by all tests here...
+  
+  # we need this to ensure that we have the crowbar barclamp
+  Barclamp.import 'crowbar'
+  # we also need to have the test jig
+  BarclampCrowbar::Jig.find_or_create_by_name :name=>'test'
   
 end

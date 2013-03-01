@@ -1,4 +1,4 @@
-% Copyright 2011, Dell 
+% Copyright 2013, Dell 
 % 
 % Licensed under the Apache License, Version 2.0 (the "License"); 
 % you may not use this file except in compliance with the License. 
@@ -15,26 +15,30 @@
 % Author: RobHirschfeld 
 % 
 -module(crowbar).
--export([step/3, validate/1, g/1, i18n/2, i18n/3, i18n/4, i18n/5, i18n/6]).
+-export([step/3, validate/1, g/1, i18n/2, i18n/3, i18n/4, i18n/5, i18n/6, json/2]).
 -import(bdd_utils).
 -import(json).
 
 g(Item) ->
   case Item of
+    "cli" -> g(cli);
+    version -> "v2";
+    cli -> bdd_utils:config(cli, "cd ../bin && ./crowbar");
     natural_key -> name;			% for most crowbar objects, this is the natural key.  override if not
     node_name -> "global-node.testing.com";
     node_atom -> global_node;
     name -> "bddtest";
     order -> 9999;
     description -> "BDD Testing Only - should be automatically removed";
-    _ -> io:format("WARNING: Could not resolve g request for ~p (fall through catch).~n", [Item]), false
+    _ -> bdd_utils:log(warn, crowbar, g, "Could not resolve g request for ~p (fall through catch)", [Item]), false
   end.
 
-i18n(Config, T1, T2, T3, T4, T5) -> i18n(Config, [T1, T2, T3, T4, T5]).
-i18n(Config, T1, T2, T3, T4) -> i18n(Config, [T1, T2, T3, T4]).
-i18n(Config, T1, T2, T3) -> i18n(Config, [T1, T2, T3]).
-i18n(Config, T1, T2) -> i18n(Config, [T1, T2]).
-i18n(Config, T) -> 
+i18n(Config, T1, T2, T3, T4, T5) -> i18n_lookup(Config, [T1, T2, T3, T4, T5]).
+i18n(Config, T1, T2, T3, T4) -> i18n_lookup(Config, [T1, T2, T3, T4]).
+i18n(Config, T1, T2, T3) -> i18n_lookup(Config, [T1, T2, T3]).
+i18n(Config, T1, T2) -> i18n_lookup(Config, [T1, T2]).
+i18n(Config, T) -> i18n_lookup(Config, [T]).
+i18n_lookup(Config, T) -> 
   Path = string:tokens(T, "+:/"),
   KeyList = case length(Path) of
     1 -> lists:nth(1, Path);
@@ -48,12 +52,19 @@ i18n(Config, T) ->
     R -> R
   end.
 
+json(Part, JSON)  ->  
+  Key = atom_to_list(Part),
+  {Key, P} = lists:keyfind(Key,1,JSON), 
+  P.
+
 % MOVED! DELETE AFTER 12/12/12 helper common to all setups using REST  
 validate(JSON) ->
   bdd_utils:depricate({2013,4,1},crowbar,validate,crowbar_rest,validate,[JSON]).
 
 % global setup
 step(Config, _Global, {step_setup, _N, Test}) -> 
+  % setup the groups object override
+  bdd_utils:config_set(alias_map,{group, group_cb}),
   bdd_utils:log(debug, "crowbar:step Global Setup running (creating node ~p)",[g(node_name)]),
   Node = node:json(g(node_name), Test ++ g(description), 100),
   bdd_restrat:create(Config, node:g(path), g(node_atom), name, Node),

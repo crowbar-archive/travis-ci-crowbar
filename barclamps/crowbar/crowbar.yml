@@ -19,7 +19,11 @@ barclamp:
   description: Self-referential barclamp enabling other barclamps
   online_help: 'https://crowbar.github.com/'
   version: 0
-  proposal_schema_version: 1
+  license: "apache2"
+  copyright: "Dell, Inc 2013"
+  api_version: "v2"
+  api_version_accepts: "v2"
+  proposal_schema_version: 2
   member:
     - crowbar
   os_support:
@@ -28,12 +32,12 @@ barclamp:
     - centos-6.2
 
 crowbar:
-  layout: 1.9
+  layout: 2.0
   order: 0
   run_order: 0
   chef_order: 0
   proposal_schema_version: 2
-
+    
 debs:
   ubuntu-12.04:
     repos:
@@ -47,7 +51,6 @@ debs:
       - deb-src http://extras.ubuntu.com/ubuntu precise main
       - deb http://security.ubuntu.com/ubuntu precise-security main restricted universe multiverse
       - deb-src http://security.ubuntu.com/ubuntu precise-security main restricted universe multiverse
-      - deb http://apt.opscode.com/ precise-0.10 main
   #repos:
     # Rabbit MQ repo
     #- deb http://www.rabbitmq.com/debian/ testing main
@@ -55,18 +58,21 @@ debs:
     - ruby1.9.1
     - ruby1.9.1-dev
     - gcc
-    - rubygems
     - tcpdump
     - libcurl4-gnutls-dev
     - build-essential
     - libxml2-dev
     - zlib1g-dev
-    - nginx
     - ipmitool
     - efibootmgr
+    - kwalify
+    - curl
+    - sqlite3
+    - libsqlite3-dev
+    - markdown
+    - vim
   build_pkgs:
     - ruby1.9.1
-    - rubygems
     - ruby1.9.1-dev
     - build-essential
     - libsqlite3-dev
@@ -99,9 +105,6 @@ debs:
     - sqlite
     - sqlite3
     - libsqlite3-dev
-    - chef
-    - chef-server
-    - chef-server-webui
     - kwalify
     - libcurl4-gnutls-dev
     # minicom stuff
@@ -124,7 +127,6 @@ debs:
     # ruby stuff
     - ruby1.9.1
     - ruby1.9.1-dev
-    - rubygems
     # runit stuff
     - runit
     # sudo stuff
@@ -143,7 +145,6 @@ debs:
 rpms:
   redhat-6.2:
     repos:
-      - rpm http://rbel.frameos.org/rbel6
       - rpm http://mirrors.servercentral.net/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
     build_pkgs:
       - libcurl-devel
@@ -153,7 +154,6 @@ rpms:
       - zlib-devel
   centos-6.2:
     repos:
-      - rpm http://rbel.frameos.org/rbel6
       - rpm http://mirrors.servercentral.net/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
     build_pkgs:
       - libcurl-devel
@@ -163,16 +163,20 @@ rpms:
       - libxml2-devel
       - zlib-devel
   required_pkgs:
-    - install
     - rubygems
     - gcc
+    - gcc-c++
     - make
     - ruby-devel
     - libxml2-devel
     - zlib-devel
     - tcpdump
-    - nginx
     - efibootmgr
+    - curl
+    - sqlite
+    - sqlite-devel
+    - python-markdown
+    - vim
   build_pkgs:
     - rubygems
     - ruby-devel
@@ -203,7 +207,6 @@ rpms:
     - curl
     - sqlite
     - sqlite-devel
-    - rubygem-chef-server
     - rubygem-kwalify
     - createrepo
     # minicom stuff
@@ -224,7 +227,6 @@ rpms:
     - openssh-server
     - openssh
     # rabbitmq stuff
-    - rabbitmq-server
     # ruby stuff
     - ruby
     - ruby-devel
@@ -244,7 +246,7 @@ gems:
     - bundler
     - bunny-(<0.8.0)
     - cancan
-    - chef-(~>10.16.2)
+    - chef-(~>10.16)
     - chefspec
     - database_cleaner
     - delayed_job_active_record
