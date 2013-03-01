@@ -19,7 +19,7 @@
 -export([scenario_store/3, scenario_retrieve/3]).
 -export([puts/0, puts/1, puts/2, debug/3, debug/2, debug/1, trace/6, untrace/3]).
 -export([log/5, log/4, log/3, log/2, log/1, log_level/1, depricate/4, depricate/6]).
--export([features/1, features/2, feature_name/2]).
+-export([features/1, features/2, feature_name/2, os_type/0]).
 -export([setup_create/5, setup_create/6, teardown_destroy/3]).
 -export([is_site_up/1, is_a/2, is_a/3, marker/1]).
 -define(NORMAL_TOKEN, 1).
@@ -185,7 +185,7 @@ is_a(JSON, Type, Key) ->
   case is_a(Type, Value) of
     true  -> true;
     X     -> 
-      log(warn, "Key ~p with Value ~p did not pass is_a(~p) test.  Result was ~p.", [Key, Value, Type, X]),
+      log(warn, "Key ~p did not pass bdd_utils:is_a(~p, ~p). Result was ~p.", [Key, Type, Value, X]),
       false
   end.
   
@@ -234,6 +234,12 @@ is_site_up(Config) ->
 
 % config using BIFs
 config(Key) -> config(Key, undefined).
+config(Key, {ListKey, Default}) ->
+  List = config(Key,[]),
+  case lists:keyfind(ListKey, 1, List) of
+    {ListKey, Value}  -> Value;
+    false             -> Default
+  end;
 config(Key, Default) when is_atom(Key) -> 
   case get(Key) of
     undefined -> put(Key, Default), Default;
@@ -269,6 +275,11 @@ config(Config, Key, Default) ->
   	      end
 	end.
 
+config_set(Key, {ListKey, Value}) ->
+  List = config(Key, []),
+  NewList = lists:keystore(ListKey, 1, List, {ListKey, Value}),
+  put(Key, NewList),
+  NewList;
 config_set(Key, Value) ->
   put(Key, Value),
   {Key, Value}.
@@ -321,7 +332,8 @@ scenario_retrieve(ID, Key, Default) ->
 % removes whitespace 
 clean_line(Raw) ->
 	CleanLine0 = string:strip(Raw),
-	CleanLine1 = string:strip(CleanLine0, left, $\t),
+	CleanLine01 = string:strip(CleanLine0, left, $#),
+	CleanLine1 = string:strip(CleanLine01, left, $\t),
 	CleanLine11 = string:strip(CleanLine1, right, $\r),
 	CleanLine2 = string:strip(CleanLine11),
 	string:strip(CleanLine2, right, $.).
@@ -377,6 +389,14 @@ add_token(Token, TokenList) ->
     _ -> [NewToken|TokenList]
   end.
 
+os_type() ->
+  case os:type() of
+    {win32, _}    -> windows;
+    {_, nt}       -> windows;
+    {unix, linux} -> linux;
+    {_, Other}    -> Other    
+  end.
+  
 % This routine is used for special subtitutions in steps that run functions or turn strings into atoms
 token_substitute(_Config, [$a, $p, $p, $l, $y, $: | Apply]) -> [File, Method | Params] = string:tokens(Apply, "."),
                                                               apply(list_to_atom(File), list_to_atom(Method), Params);

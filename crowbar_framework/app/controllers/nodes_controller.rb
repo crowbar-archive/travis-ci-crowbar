@@ -15,141 +15,18 @@
 #
 class NodesController < ApplicationController
 
-  # API GET /2.0/crowbar/2.0/nodes
+  # API GET /crowbar/v2/nodes
   # UI GET /dashboard
   def index
     # EventQueue.publish(Events::WebEvent.new("nodes index page"))
     # k = Delayed::Job.enqueue(Jobs::TestJob.new)
     # puts "DEBUG: k = #{k.inspect}"
 
-    @sum = Node.sum(:fingerprint)
-    @groups = Group.find_all_by_category 'ui'
-    @node = Node.find_key params[:id]
-    session[:node] = params[:id]
-    if params.has_key?(:role)
-      result = Node.all 
-      @nodes = result.find_all { |node| node.role? params[:role] }
-      if params.has_key?(:names_only)
-         names = @nodes.map { |node| node.name }
-         @nodes = {:role=>params[:role], :nodes=>names, :count=>names.count}
-      end
+    if params.has_key? :group_id
+      g = Group.find_key params[:group_id]
+      render api_index :group, g.nodes
     else
-      @nodes = {}
-      Node.all.each { |n| @nodes[n.id]=n.name }
-    end
-    respond_to do |format|
-      format.html # index.html.haml
-      format.json { render :json => @nodes }
-    end
-  end
-
-  # Bulk Edit
-  def list
-    if request.post?
-      nodes = {}
-      params.each do |k, v|
-        if k.starts_with? "node:"
-          parts = k.split ':'
-          node = parts[1]
-          area = parts[2]
-          nodes[node] = {} if nodes[node].nil?
-          nodes[node][area] = (v.empty? ? nil : v)
-        end
-      end
-      succeeded = []
-      failed = []
-      # before we start saving, make sure someone did not give us duplicate aliases
-      # this SHOULD Be causght by the node.save but race conditoins are breaking the constency of the DB
-      alias_dup = false
-      nodes.each do |node_name, values|
-        nodes.each do |nn, vv|
-           alias_dup = true if nn!=node_name and vv['alias'] == values['alias']
-           failed << node_name if alias_dup 
-           break if alias_dup
-        end
-      end
-      unless alias_dup
-        nodes.each do |node_name, values|
-          begin
-            dirty = false
-            # TODO: can one DE-allocate a node in bluk-edit?  If so, we need to add that here...
-            node = Node.find_by_name node_name
-            if !node.allocated and values['allocate'] === 'checked'
-              node.allocated = true
-              dirty = true
-            end
-            if !(node.description == values['description'])
-              node.description = values['description']
-              dirty = true
-            end
-            if !(node.alias == values['alias'])
-              node.alias = values['alias']
-              dirty = true
-            end
-            if !(node.group.name == values['group'])
-              node.group = values['group']
-              dirty = true
-            end
-            if !values['bios'].nil? and values['bios'].length>0 and !(node.bios_set === values['bios']) and !(values['bios'] === 'not_set')
-              node.bios_set = values['bios']
-              dirty = true
-            end
-            if !values['raid'].nil? and values['raid'].length>0 and !(node.raid_set === values['raid']) and !(values['raid'] === 'not_set')
-              node.raid_set = values['raid']
-              dirty = true
-            end
-            if dirty
-              begin
-                node.save!
-                succeeded << node_name
-              rescue Exception=>e
-                failed << node_name
-              end
-            end
-          rescue Exception=>e
-            failed << node_name
-          end
-        end
-      end
-      if failed.length>0
-        flash[:notice] = failed.join(',') + ": " + I18n.t('failed', :scope=>'nodes.list')
-      elsif succeeded.length>0
-        flash[:notice] = succeeded.join(',') + ": " + I18n.t('updated', :scope=>'nodes.list')
-      else
-        flash[:notice] = I18n.t('nochange', :scope=>'nodes.list')
-      end
-    end
-    @options = CrowbarService.read_options
-    @nodes = {}
-    Node.all.each do |node|
-      @nodes[node.name] = node if params[:allocated].nil? or !node.allocated?
-    end
-  end
-
-  def families
-    @families = {}
-    Node.all.each do |n|
-      f = n.family.to_s  
-      @families[f] = {:names=>[], :family=>n.family} unless @families.has_key? f
-      @families[f][:names] << {:alias=>n.alias, :description=>n.description, :handle=>n.name}
-    end
-  end
-  
-  def group_change
-    # TODO: not used?
-    node = Node.find_by_name params[:id]
-    if node.nil?
-      raise "Node #{params[:id]} not found.  Cannot change group" 
-    else
-      group = params[:group]
-      if params.key? 'automatic'
-        node.group=""
-      else
-        node.group=group
-      end
-      node.save
-      Rails.logger.info "node #{node.name} (#{node.alias}) changed its group to be #{node.group.empty? ? 'automatic' : group}."
-      render :inline => "SUCCESS: added #{node.name} to #{group}.", :cache => false 
+      render api_index :node, Node.all
     end
   end
   
@@ -178,82 +55,82 @@ class NodesController < ApplicationController
     render :inline => {:sum => sum, :status=>status, :state=>state, :i18n=>i18n, :groups=>groups, :count=>state.length}.to_json, :cache => false
     
   end
-
+  
+  # CB1 move to IMPI
   def hit
     action = params[:req]
     name = params[:name] || params[:id]
-    machine = Node.find_by_name name
-    if machine.nil?
-      render :text=>"Could not find node '#{name}'", :status => 404
-    else
-      case action
-      when 'reinstall', 'reset', 'update', 'delete'
-        machine.set_state(action)
-      when 'reboot'
-        machine.reboot
-      when 'shutdown'
-        machine.shutdown
-      when 'poweron'
-        machine.poweron
-      when 'identify'
-        machine.identify
-      when 'allocate'
-        machine.allocate
-      else
-        render :text=>"Invalid hit request '#{action}'", :status => 500
-      end
-    end
-    render :text=>"Attempting '#{action}' for node '#{machine.name}'", :status => 200
+    render api_not_supported action, name
   end
-
-  # GET /2.0/node/1
-  # GET /2.0/node/foo.example.com
+    
   def show
-    # for temporary backwards compatibility, we'll combine the chef object and db object
-    @node = Node.find_key params[:id]
     respond_to do |format|
-      format.html # show.html.erb
-      format.json {
-        render :json => @node
-      }
+      format.html { @node = Node.find_key params[:id] } # show.html.erb
+      format.json { render api_show :node, Node }
     end
   end
 
   # RESTful DELETE of the node resource
   def destroy
-    target = Node.find_key params[:id]
-    if target.nil?
-      render :text=>"Could not find node '#{params[:id]}'", :status => 404
-    else
-      if target.delete
-        render :text => "Node #{params[:id]} deleted!"
-      else
-        render :text=>"Could not delete node '#{params[:id]}'", :status => 500
-      end
-    end
+    render api_delete Node
   end
   
   # RESTfule POST of the node resource
   def create
-    if request.post?
-      @node = Node.create! params
-      render :json => @node
-    end
+    n = Node.create params
+    render api_show :node, Node, n.id.to_s, nil, n
   end
   
-  def edit
-    @node = Node.find_key params[:id]
-    @groups = {}
-    Group.all(:conditions=>["category=?",'ui']).each { |g| @groups[g.name] = g.id }
+  def update
+    render api_update :node, Node
   end
 
+  def attribs
+    unless params[:version].eql?('v2') 
+      render :text=>I18n.t('api.wrong_version', :version=>params[:version])
+    else
+      # working objects
+      node = Node.find_key params[:id]
+      # we need to treat attribs by type OR ID 
+      # except that the ID is the attrib while the name is the type
+      if params[:attrib]
+        attrib = AttribType.add params[:attrib]
+        ai = Attrib.find_by_node_id_and_attrib_id node.id, attrib.id
+      elsif params[:attrib] =~ /^[0-9]+$/
+        ai = Attrib.find params[:attrib]
+        attrib = ai.attrib
+      end
+  
+      # POST and PUT (do the same thing since PUT will create the missing info)
+      if request.post? or request.put?
+        # this is setup to add the param even if we could not find it earlier
+        ai.actual = params["value"]
+        render api_show :attrib, Attrib, nil, nil, ai
+      # DELETE
+      elsif request.delete? and attrib and node
+        render api_delete Attrib, ai.id
+      # fall through REST actions (all require ID)
+      elsif request.get? and attrib
+        render api_show :attrib, Attrib, nil, nil, ai
+      elsif params[:attrib]
+        render :text=>I18n.t('api.not_found', :type=>'attrib', :id=>params[:attrib]), :status => :not_found
+      # list (no ID)
+      elsif request.get?  
+        render api_index :attrib, node.attribs, nodes_attribs_path
+      # Catch
+      else
+        render :text=>I18n.t('api.unknown_request'), :status => 400
+      end
+    end
+  end
 
   def allocate
     # allocate node
   end
 
   # RESTfule PUT of the node resource
-  def update
+  # CB1 - please review & update
+  def update_remove
     get_node_and_network(params[:id] || params[:name])
     if params[:submit] == t('nodes.edit.allocate')
       @node.allocated = true

@@ -17,7 +17,7 @@ require 'test_helper'
 class NodeModelTest < ActiveSupport::TestCase
 
   def setup
-    @crowbar = Barclamp.find_or_create_by_name :name=>"crowbar"
+    @crowbar = Barclamp.import_1x "crowbar"
   end
 
 
@@ -83,19 +83,17 @@ class NodeModelTest < ActiveSupport::TestCase
     value = "bar"
     description = "unit test"
     n = Node.create :name=>"oldattribute.example.com"
-    n.save
-    a = Attrib.create :name=>name, :description=>description
-    a.save
-    na = n.attrib_get(a)
+    a = AttribType.add :name=>name, :description=>description
+    na = n.get_attrib(a)
     assert_equal nil, na.value
     assert_equal :empty, na.state
     na.actual = value
     assert_equal value, na.value
     assert_equal :ready, na.state
     na.save
-    v = Node.find(n.id).attrib_get(name)
-    assert_equal name, v.attrib.name
-    assert_equal description, v.attrib.description
+    v = Node.find(n.id).get_attrib(name)
+    assert_equal name, v.attrib_type.name
+    assert_equal description, v.attrib_type.description
     assert_equal value, v.value
     assert_equal :ready, v.state
   end
@@ -106,16 +104,29 @@ class NodeModelTest < ActiveSupport::TestCase
     node = "attrib.example.com"
     n = Node.create :name=>node
     assert_not_nil n
-    a = n.attrib_get(name)
+    a = n.get_attrib(name)
     assert_not_nil a
-    assert_equal I18n.t('model.attribs.barclamp.default_create_description', :barclamp=>'unknown'), a.attrib.description
+    assert_equal I18n.t('model.attribs.barclamp.default_create_description', :barclamp=>'unknown'), a.attrib_type.description
     assert_nil a.value
-    attrib = Attrib.find_by_name name
+    attrib = AttribType.find_by_name name
     assert_equal name, attrib.name
     assert_equal I18n.t('model.attribs.barclamp.default_create_description', :barclamp=>'unknown'), attrib.description
     assert_equal nil, a.value
     assert_equal :empty, a.state
   end
 
+  test "attribs without role get set as user defined" do
+    name = "annie"
+    node = "daddy.warbucks.com"
+    n = Node.create :name=>node
+    assert_not_nil n
+    a = n.get_attrib(name)
+    assert_not_nil a
+    assert_equal name, a.attrib_type.name
+    assert_equal "user_defined", a.role.name
+    assert_equal n.id, a.node_id
+    assert_equal @crowbar.id, a.barclamp.id
+  end
+  
 end
 

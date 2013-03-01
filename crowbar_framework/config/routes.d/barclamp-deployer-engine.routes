@@ -1,0 +1,1 @@
+mount BarclampDeployer::Engine, :at => 'deployer'

@@ -6,10 +6,14 @@ Feature: Navigation, Check Core Navigation
   Scenario: Translation Check
     When I go to the home page
     Then there should be no translation errors
+
+  Scenario: Top Nav Renders
+    When I go to the home page
+    Then I should not see "Render Error"
           
   Scenario: Home Page Nav
     When I go to the home page
-    Then I should see a menu for {bdd:crowbar.i18n.nav.nodes}
+    Then I should see a menu for {bdd:crowbar.i18n.nav.dashboard}
       And I should see a menu for "Barclamps"
       And I should see a menu for "Utilities"
       And I should see a menu for "Help"
@@ -33,8 +37,8 @@ Feature: Navigation, Check Core Navigation
 
   Scenario: Barclamps Nav
     Given I am on the home page
-    When I click on the "\\\[Barclamps\\\]" menu item
-    Then I should see {bdd:crowbar.i18n.barclamp.modules.title} in the body  
+    When I click on the "Barclamps" menu item
+    Then I should see {bdd:crowbar.i18n.barclamp.index.title} in the body  
       And I should see "crowbar" in the body
       And I should see "deployer" in the body
       And I should see "provisioner" in the body
@@ -54,6 +58,7 @@ Feature: Navigation, Check Core Navigation
       And there should be no translation errors
 
   Scenario: Crowbar Barclamps Nav
+    Skip until we have this page again
     Given I am on the home page
     When I click on the "Crowbar" menu item
     Then I should see "Crowbar Members" in the body  

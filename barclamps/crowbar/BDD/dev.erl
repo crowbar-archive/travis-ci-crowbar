@@ -1,4 +1,4 @@
-% Copyright 2012, Dell 
+% Copyright 2013, Dell 
 % 
 % Licensed under the Apache License, Version 2.0 (the "License"); 
 % you may not use this file except in compliance with the License. 
@@ -27,7 +27,7 @@ pop(ConfigRaw) ->
   bdd_utils:config_set(inspect, false),
   {ok, Build} = file:consult(bdd_utils:config(simulator, "dev.config")),
   [ add_group(G) || G <- buildlist(Build, groups) ],
-  [ add_attrib(A) || A <- buildlist(Build, attribs) ],
+  [ add_attrib_type(A) || A <- buildlist(Build, attrib_types) ],
   [ add_node(N) || N <- buildlist(Build, nodes) ],
   map_node_attribs(get({dev, node}),get({dev, attrib})),
   bdd_utils:config_unset(global_setup),
@@ -38,7 +38,7 @@ pop(ConfigRaw) ->
 unpop()       ->  
   {ok, Build} = file:consult(bdd_utils:config(simulator, "dev.config")),
   [ remove(nodes, N) || {N, _, _, _, _} <- buildlist(Build, nodes) ], 
-  [ remove(attrib, A) || {A, _, _, _, _} <- buildlist(Build, attribs) ], 
+  [ remove(attrib_types, A) || {A, _, _, _, _} <- buildlist(Build, attrib_types) ], 
   [ remove(groups, G) || {G, _, _, _} <- buildlist(Build, groups) ],
   bdd:stop([]). 
 
@@ -60,17 +60,17 @@ remove(Type, Atom) ->
   bdd_utils:log(info, "Removed ~p with tag ~p", [Type, Atom]).
 
 add_group({Atom, Name, Descripton, Order}) ->
-  JSON = groups:json(Name, Descripton, Order, 'ui'),
-  Path = apply(groups, g, [path]),
+  JSON = group_cb:json(Name, Descripton, Order, 'ui'),
+  Path = apply(group_cb, g, [path]),
   Result = json:parse(bdd_restrat:create([], Path, JSON)),
   Key = json:keyfind(Result, id),
   bdd_utils:config_set(Atom, Key),
-  storename(group, Name),
+  storename(group_cb, Name),
   bdd_utils:log(info, "Created Group ~p=~p named ~p", [Atom, Key, Name]).
 
-add_attrib({Atom, Name, Description, Order, _Type}) ->
-  JSON = attrib:json(Name, Description, Order),
-  Path = apply(attrib, g, [path]),
+add_attrib_type({Atom, Name, Description, Order, _Type}) ->
+  JSON = attrib_type:json(Name, Description, Order),
+  Path = apply(attrib_type, g, [path]),
   Result = json:parse(bdd_restrat:create([], Path, JSON)),
   Key = json:keyfind(Result, id),
   bdd_utils:config_set(Atom, Key),
@@ -89,6 +89,6 @@ add_node({Atom, Name, Description, Order, Group}) ->
 
 map_node_attribs([], _Attribs)         -> done;
 map_node_attribs([N | Nodes], Attribs) ->
-  [attrib_instance:node_add_attrib([], N, A) || A <- Attribs],
+  [attrib:node_add_attrib([], N, A) || A <- Attribs],
   map_node_attribs(Nodes, Attribs).
   
