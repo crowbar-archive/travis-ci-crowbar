@@ -16,6 +16,12 @@ PATH
     barclamp_logging (1.9)
       rails (~> 3.2.11)
 
+PATH
+  remote: /tmp/crowbar-dev-test/opt/dell/barclamps/network/crowbar_engine/barclamp_network
+  specs:
+    barclamp_network (0.0.1)
+      rails (~> 3.2.9)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -248,6 +254,7 @@ DEPENDENCIES
   barclamp_chef!
   barclamp_deployer!
   barclamp_logging!
+  barclamp_network!
   chef (~> 10.8)
   chefspec
   daemons
