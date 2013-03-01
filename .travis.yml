@@ -5,7 +5,7 @@ rvm:
 gemfile:
   - crowbar_framework/Gemfile
 bundler_args: --without development
-script: 'cd crowbar_framework && bundle exec rake db:drop db:migrate db:fixtures:dump test:units spec'
+script: 'cd crowbar_framework && bundle exec rake db:drop railties:install:migrations db:migrate db:fixtures:dump test:units spec'
 notifications:
   email:
     - crowbar@dell.com
