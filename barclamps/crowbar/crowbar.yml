@@ -30,6 +30,7 @@ barclamp:
     - ubuntu-12.04
     - redhat-6.2
     - centos-6.2
+    - opensuse-12.2
 
 crowbar:
   layout: 2.0
@@ -285,3 +286,4 @@ gems:
     - xml-simple
     - factory_girl_rails-(~>1.7.0)
     - foodcritic
+    - coveralls

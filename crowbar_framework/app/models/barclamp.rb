@@ -15,6 +15,10 @@
 
 class Barclamp < ActiveRecord::Base
 
+  silence_warnings do
+    DEFAULT_DEPLOYMENT_NAME = I18n.t('default', :default=>'default')
+  end
+
   attr_accessible :id, :name, :description, :display, :version, :online_help, :user_managed, :type, :source_path
   attr_accessible :proposal_schema_version, :layout, :order, :run_order, :jig_order
   attr_accessible :commit, :build_on, :mode, :transitions, :transition_list
@@ -30,7 +34,7 @@ class Barclamp < ActiveRecord::Base
   # and that it starts with an alph and only contains alpha,digits,underscore
   #
   validates_uniqueness_of :name, :case_sensitive => false, :message => I18n.t("db.notunique", :default=>"Name item must be unique")
-  validates_exclusion_of :name, :in => %w(framework barclamp docs machines users support application), :message => I18n.t("db.barclamp_excludes", :default=>"Illegal barclamp name")
+  validates_exclusion_of :name, :in => %w(framework api barclamp docs machines jigs roles groups users support application), :message => I18n.t("db.barclamp_excludes", :default=>"Illegal barclamp name")
     
   validates_format_of :name, :with=>/^[a-zA-Z][_a-zA-Z0-9]*$/, :message => I18n.t("db.lettersnumbers", :default=>"Name limited to [_a-zA-Z0-9]")
       
@@ -94,8 +98,6 @@ class Barclamp < ActiveRecord::Base
   end
 
 
-  DEFAULT_DEPLOYMENT_NAME = I18n.t('default')
-
   #
   # Possible Override function
   #
@@ -122,7 +124,7 @@ class Barclamp < ActiveRecord::Base
         # one day, we could use non-templates for the base!
         based_on ||= self.template    
         # create the snapshot 
-        snapshot = based_on.deep_clone proposal, deployment.name, false
+        snapshot = based_on.deep_clone proposal, deployment[:name], false
         # attach the snapshot to the config
         proposal.proposed_snapshot_id = snapshot.id
         proposal.save
@@ -194,22 +196,32 @@ class Barclamp < ActiveRecord::Base
 
     # add the roles & attributes
     jdeploy = json["deployment"][name]
+    ss = self.template
+    ss.element_order =  ActiveSupport::JSON.encode(jdeploy["element_order"])
+    ss.save
+    # flatten the element order list
+    eorder = {}
     jdeploy["element_order"].each_with_index do |role_hash, top_index|
       role_hash.each_with_index do |role, index|
-        unless role.nil?
-          states = jdeploy["element_states"][role].join(",") rescue "all"
-          order = 100+(top_index*100)+index
-          run_order = jdeploy["element_run_list_order"][role] rescue order
-          ri = self.template.add_role role
-          ri.update_attributes( :states => states,
-                                :order => order,
-                                :run_order => run_order, 
-                                :description=> I18n.t('imported', :scope => 'model.barclamp', :file=>template_file)  
-                              )
-        end
+        # otder is a 2-d array, so we need to capture the row/col when we flatten it
+        eorder[role] ||= 100+(top_index*100)+index
       end
     end
-
+    # now capture roles from element states
+    if jdeploy["element_states"]
+      jdeploy["element_states"].each do |role, states|
+        states = states.join(",") rescue "all"
+        run_order = jdeploy["element_run_list_order"][role] rescue order
+        ri = self.template.add_role role
+        ri.update_attributes( :states => states,
+                              :order => eorder[role] || 1000,
+                              :run_order => run_order, 
+                              :description=> I18n.t('imported', :scope => 'model.barclamp', :file=>template_file)  
+                                )
+        ri.save
+      end
+    end
+    
     # theses need to move into AttribInstnaces
     mode = jdeploy["config"]["mode"] rescue "full"
     transitions = jdeploy["config"]["transitions"] rescue false
@@ -374,18 +386,20 @@ class Barclamp < ActiveRecord::Base
   # This method ensures that we have a type defined for 
   def create_type_from_name
     raise "barclamps require a name" if self.name.nil?
-    file = "#{self.name}"
-    myclass = "Barclamp#{self.name.camelize}::Barclamp"
-    # this will need to be fixed for the engines!!
-    file = File.join 'app','models',"barclamp_#{self.name}", "barclamp.rb"
-    if !self.type.nil?
-      # do nothing - everything is OK
-    elsif File.exist? file
-      self.type = myclass
-    else
-      Rails.logger.warn "Creating barclamp #{self.name} using the generic model because the #{file} was not found."
-      self.type = "BarclampFramework"     # fall back to generic model
+    namespace = "Barclamp#{self.name.camelize}"
+    # these routines look for the namespace & class, 
+    m = Module::const_get(namespace) rescue nil
+    if m
+      c = m.const_get("Barclamp") rescue nil
     end
+    # if they dont' find it we fall back to BarclampFramework (this should go away!)
+    self.type = if c.nil?
+      Rails.logger.warn "Barclamp #{self.name} created with fallback Model!"
+      "BarclampFramework"
+    else 
+      "#{namespace}::Barclamp"
+    end
+    
   end
      
 end
