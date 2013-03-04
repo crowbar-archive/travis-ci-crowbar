@@ -23,8 +23,8 @@ class Snapshot < ActiveRecord::Base
 
   ROLE_ORDER         = "'roles'.'order', 'roles'.'run_order'"
   
-  attr_accessible :id, :name, :description, :order, :status, :failed_reason
-  attr_accessible :deployement_id, :barclamp_id
+  attr_accessible :id, :name, :description, :order, :status, :failed_reason, :element_order
+  attr_accessible :deployement_id, :barclamp_id, :jig_event_id
   
   belongs_to      :barclamp
   belongs_to      :deployment,        :inverse_of => :snapshot
@@ -36,6 +36,8 @@ class Snapshot < ActiveRecord::Base
 
   has_many        :attribs,           :through => :roles
   has_many        :attrib_types,      :through => :attribs
+  
+  has_many        :jig_events
   
   def active?
     deployment.active_snapshot_id == self.id
@@ -65,6 +67,23 @@ class Snapshot < ActiveRecord::Base
                                                                          :snapshot_id=>self.id,
                                                                          :description=>desc
     ri.add_attrib attrib_type, nil, self.name
+  end
+
+  # determines the role run order using the imported element_order
+  # return is a nested array of roles
+  def role_order
+    ro = []
+    source = ActiveSupport::JSON.decode(self.element_order)
+    if source
+      source.each do |parent|
+        children = []
+        parent.each do |role|
+          children << self.add_role(role) if role
+        end
+        ro << children
+      end
+    end
+    ro
   end
 
   ##

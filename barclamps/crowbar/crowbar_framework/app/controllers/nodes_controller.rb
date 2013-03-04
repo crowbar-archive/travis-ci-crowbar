@@ -53,7 +53,7 @@ class NodesController < ApplicationController
       end
     end
     render :inline => {:sum => sum, :status=>status, :state=>state, :i18n=>i18n, :groups=>groups, :count=>state.length}.to_json, :cache => false
-    
+
   end
   
   # CB1 move to IMPI
@@ -124,8 +124,25 @@ class NodesController < ApplicationController
     end
   end
 
+  def transistion
+    if request.put? or request.get?
+      key = ( params[:id] || params[:node_id])
+      n = Node.find_key key
+      if n
+        sa = n.state_attrib 
+        sa.state = params[:value]
+        sa.save
+        redirect_to nodes_path :version=>params[:version], :id=>n.id, :node_id=>key
+      else
+        render :text=>I18n.t('api.not_found', :id=>key, :type=>type.to_s), :status => :not_found  
+      end
+    else
+      render api_not_supported 'post|delete', 'node/:id/transistion'
+    end
+  end
+  
   def allocate
-    # allocate node
+    render api_not_supported 'put', 'node/allocate'
   end
 
   # RESTfule PUT of the node resource
