@@ -23,7 +23,7 @@ PATH
       rails (~> 3.2.9)
 
 GEM
-  remote: file:/tmp/crowbar-dev-test/gemsite/
+  remote: http://rubygems.org/
   specs:
     actionmailer (3.2.12)
       actionpack (= 3.2.12)
@@ -100,7 +100,7 @@ GEM
       rest-client
       simplecov (>= 0.7)
       thor
-    daemons (1.1.6)
+    daemons (1.1.9)
     database_cleaner (0.9.1)
     delayed_job (3.0.5)
       activesupport (~> 3.0)
