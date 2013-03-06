@@ -2,25 +2,25 @@ PATH
   remote: /tmp/crowbar-dev-test/opt/dell/barclamps/chef/crowbar_engine/barclamp_chef
   specs:
     barclamp_chef (0.0.1)
-      rails (~> 3.2.11)
+      rails
 
 PATH
   remote: /tmp/crowbar-dev-test/opt/dell/barclamps/deployer/crowbar_engine/barclamp_deployer
   specs:
     barclamp_deployer (0.0.1)
-      rails (~> 3.2.12)
+      rails
 
 PATH
   remote: /tmp/crowbar-dev-test/opt/dell/barclamps/logging/crowbar_engine/barclamp_logging
   specs:
     barclamp_logging (1.9)
-      rails (~> 3.2.11)
+      rails
 
 PATH
   remote: /tmp/crowbar-dev-test/opt/dell/barclamps/network/crowbar_engine/barclamp_network
   specs:
     barclamp_network (0.0.1)
-      rails (~> 3.2.9)
+      rails
 
 GEM
   remote: http://rubygems.org/
@@ -59,7 +59,7 @@ GEM
       amq-protocol (>= 1.2.0)
       eventmachine
     amq-protocol (1.2.0)
-    amqp (0.9.9)
+    amqp (0.9.10)
       amq-client (~> 0.9.12)
       amq-protocol (~> 1.2.0)
       eventmachine
