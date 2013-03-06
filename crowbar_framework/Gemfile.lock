@@ -11,6 +11,12 @@ PATH
       rails
 
 PATH
+  remote: /tmp/crowbar-dev-test/opt/dell/barclamps/dns/crowbar_engine/barclamp_dns
+  specs:
+    barclamp_dns (0.0.1)
+      rails
+
+PATH
   remote: /tmp/crowbar-dev-test/opt/dell/barclamps/logging/crowbar_engine/barclamp_logging
   specs:
     barclamp_logging (1.9)
@@ -94,7 +100,7 @@ GEM
     ci_reporter (1.8.4)
       builder (>= 2.1.2)
     colorize (0.5.8)
-    coveralls (0.6.0)
+    coveralls (0.6.2)
       colorize
       multi_json (~> 1.3)
       rest-client
@@ -260,6 +266,7 @@ DEPENDENCIES
   amqp
   barclamp_chef!
   barclamp_deployer!
+  barclamp_dns!
   barclamp_logging!
   barclamp_network!
   chef (~> 10.8)
