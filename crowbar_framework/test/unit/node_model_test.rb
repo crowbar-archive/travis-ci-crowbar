@@ -36,7 +36,7 @@ class NodeModelTest < ActiveSupport::TestCase
   test "state unknown" do
     n = Node.create! :name=>"unknown.node.com"
     assert_not_nil n, "created node"
-    assert_equal 'unknown', n.state
+    assert_equal 'empty', n.state
     assert_equal Node::UNKNOWN, n.state_attrib.state
   end
   
@@ -77,6 +77,7 @@ class NodeModelTest < ActiveSupport::TestCase
     assert_raise(ActiveRecord::RecordInvalid, SQLite3::ConstraintException) { Node.create!(:name=>" nospaces.bar.it") }
     assert_raise(ActiveRecord::RecordInvalid, SQLite3::ConstraintException) { Node.create!(:name=>"no spaces.dell.com") }
     assert_raise(ActiveRecord::RecordInvalid, SQLite3::ConstraintException) { Node.create!(:name=>"nospacesatall.end.edu ") }
+    assert_raise(ActiveRecord::RecordInvalid, SQLite3::ConstraintException) { Node.create!(:name=>"musthaveatleastthreedomains.com") }
   end
 
   test "Get Attribute for existing attribute gets value" do

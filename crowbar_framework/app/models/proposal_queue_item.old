@@ -1,4 +1,4 @@
-# Copyright 2011, Dell
+# Copyright 2012, Dell
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
-# Default path variables.
-#
 
-# Make sure /opt/dell/bin is in the root path
-if ! echo ${PATH} | /bin/grep -q /opt/dell/bin ; then
-        if [ `/usr/bin/id -u` = 0 ] ; then
-                PATH=${PATH}:/opt/dell/bin
-        fi
-fi
+class ProposalQueueItem < ActiveRecord::Base
+  attr_accessible :position, :queue_reason
 
-if [ -f /etc/crowbar.install.key ] ; then
-    export CROWBAR_KEY=`cat /etc/crowbar.install.key`
-fi
+  belongs_to :proposal_queue
+  belongs_to :barclamp_instance
+end
 
