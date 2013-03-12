@@ -18,6 +18,12 @@ PATH
       rails
 
 PATH
+  remote: /tmp/crowbar-dev-test/opt/dell/barclamps/ipmi/crowbar_engine/barclamp_ipmi
+  specs:
+    barclamp_ipmi (0.0.1)
+      rails
+
+PATH
   remote: /tmp/crowbar-dev-test/opt/dell/barclamps/logging/crowbar_engine/barclamp_logging
   specs:
     barclamp_logging (1.9)
@@ -249,6 +255,7 @@ DEPENDENCIES
   barclamp_chef!
   barclamp_deployer!
   barclamp_dns!
+  barclamp_ipmi!
   barclamp_logging!
   barclamp_network!
   coveralls

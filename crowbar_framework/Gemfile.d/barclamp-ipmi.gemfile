@@ -1,0 +1,1 @@
+gem 'barclamp_ipmi', :path => File.join(crowbar_path, '..', 'barclamps', 'ipmi', 'crowbar_engine/barclamp_ipmi')
