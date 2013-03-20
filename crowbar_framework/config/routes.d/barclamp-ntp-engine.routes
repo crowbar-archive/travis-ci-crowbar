@@ -1,0 +1,1 @@
+mount BarclampNtp::Engine, :at => 'ntp'

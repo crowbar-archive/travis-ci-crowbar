@@ -35,6 +35,18 @@ PATH
     barclamp_network (0.0.1)
       rails
 
+PATH
+  remote: /tmp/crowbar-dev-test/opt/dell/barclamps/ntp/crowbar_engine/barclamp_ntp
+  specs:
+    barclamp_ntp (0.0.1)
+      rails
+
+PATH
+  remote: /tmp/crowbar-dev-test/opt/dell/barclamps/test/crowbar_engine/barclamp_test
+  specs:
+    barclamp_test (0.0.1)
+      rails
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -256,6 +268,8 @@ DEPENDENCIES
   barclamp_ipmi!
   barclamp_logging!
   barclamp_network!
+  barclamp_ntp!
+  barclamp_test!
   coveralls
   daemons
   database_cleaner (>= 0.7.2)

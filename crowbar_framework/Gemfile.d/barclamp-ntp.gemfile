@@ -1,0 +1,1 @@
+gem 'barclamp_ntp', :path => File.join(crowbar_path, '..', 'barclamps', 'ntp', 'crowbar_engine/barclamp_ntp')
