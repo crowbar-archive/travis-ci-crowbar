@@ -136,7 +136,7 @@ GEM
     factory_girl_rails (1.7.0)
       factory_girl (~> 2.6.0)
       railties (>= 3.0.0)
-    haml (4.0.0)
+    haml (4.0.1)
       tilt
     highline (1.6.16)
     hike (1.2.1)
