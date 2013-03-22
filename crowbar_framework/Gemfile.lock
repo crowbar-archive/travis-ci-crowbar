@@ -161,7 +161,7 @@ GEM
     mixlib-config (1.1.2)
     mixlib-log (1.4.1)
     mixlib-shellout (1.1.0)
-    multi_json (1.7.1)
+    multi_json (1.7.2)
     net-http-digest_auth (1.2.1)
     net-ssh (2.6.6)
     net-ssh-gateway (1.2.0)
