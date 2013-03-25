@@ -90,6 +90,7 @@ GEM
       eventmachine
     arel (3.0.2)
     bcrypt-ruby (3.0.1)
+    bluecloth (2.2.0)
     builder (3.0.4)
     chef (11.4.0)
       erubis
@@ -270,6 +271,7 @@ DEPENDENCIES
   barclamp_network!
   barclamp_ntp!
   barclamp_test!
+  bluecloth (>= 2.0.0)
   coveralls
   daemons
   database_cleaner (>= 0.7.2)
