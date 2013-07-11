@@ -1,0 +1,1 @@
+mount BarclampProvisioner::Engine, :at => 'provisioner'

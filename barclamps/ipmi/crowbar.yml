@@ -28,10 +28,9 @@ barclamp:
     - crowbar
 
 crowbar:
-  layout: 1.9
+  layout: 2.0
   order: 16
-  run_order: 16
-  chef_order: 16
+
 
 orchestration:
   mode: full

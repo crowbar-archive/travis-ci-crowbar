@@ -21,11 +21,15 @@ class GroupsController < ApplicationController
   end
 
   def index
-    if params.has_key? :node_id
+    @list = if params.has_key? :node_id
       n = Node.find_key params[:node_id]
-      render api_index :node, n.groups
+      n.groups
     else
-      render api_index :group, Group.all
+      Group.all
+    end
+    respond_to do |format|
+      format.html { }
+      format.json { render api_index :group, @list }
     end
   end
 
@@ -42,7 +46,7 @@ class GroupsController < ApplicationController
     if params.has_key? :node_id
       render api_not_supported 'put', 'nodes/:id/groups/:id'
     else
-      g = Group.create params
+      g = Group.create! params
       render api_show :group, Group, nil, nil, g
     end
   end
