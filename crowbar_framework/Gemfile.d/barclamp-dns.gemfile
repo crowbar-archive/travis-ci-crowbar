@@ -1,1 +1,0 @@
-gem 'barclamp_dns', :path => File.join(crowbar_path, '..', 'barclamps', 'dns', 'crowbar_engine/barclamp_dns')

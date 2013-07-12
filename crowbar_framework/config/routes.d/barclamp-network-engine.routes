@@ -1,1 +1,0 @@
-mount BarclampNetwork::Engine, :at => 'network'
