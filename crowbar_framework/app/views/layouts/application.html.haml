@@ -1,0 +1,40 @@
+!!!
+%html
+  %head
+    %title= "Crowbar: #{ controller.action_name }"
+    = stylesheet_link_tag 'application'
+    /[if IE]
+      = stylesheet_link_tag 'ie', :media => "all"
+      = javascript_include_tag "html5"
+    -# ALWAYS DIFFERENT FROM RAILS3
+    = javascript_include_tag 'jquery.min', 'jquery-ui.min', 'jquery.sparkline.min', 'rails', 'codemirror/codemirror', 'codemirror/javascript', 'jquery.spritely-0.6.1', 'application', 'event_helpers', 'drag_drop_helpers', 'jquery.dataTables'
+    = csrf_meta_tag
+  
+  %body
+    %header
+      .container
+        %h1
+          %a{:href => "/"}
+            %span logo
+        %nav
+          = render_navigation :expand_all => true, :skip_if_empty => true
+    
+    - if flash[:notice] || !CHEF_ONLINE
+      .notice#flash
+        .container
+          %p
+            = flash[:notice].gsub("\n", "<br/>")
+            = link_to " [#{t('clear_msg')}]", "#", :onClick=>"$('#flash').attr('style', 'display:none');"
+          - if !CHEF_ONLINE
+            %p= t "offline"
+
+    #main.container
+      = yield
+
+    %footer
+      =t '.provided_by'
+      %a{:href=>"http://dell.com/cloud", :target=>"_new"}
+        %img{:src=>"/images/layout/dell.png", :alt=>"Dell, Inc.", :title=>"Dell, Inc.", :style=>"vertical-align:middle;padding-bottom:2px"}
+      %a{:href=>"http://dell.com/cloud", :target=>"_new", :alt=>"Dell, Inc."}
+        CloudEdge Solutions team
+      ="- Version #{CROWBAR_VERSION}"

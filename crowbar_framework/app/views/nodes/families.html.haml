@@ -1,0 +1,30 @@
+- options = CrowbarService.read_options
+%h1= t('.title')
+
+%table.data.box
+  %thead
+    %tr
+      %th= t('.name')
+      %th= t('.units')
+      %th= t('.ram')
+      %th= t('.nics')
+      %th= t('.drives')
+      -if options[:show].include? :raid
+        %th= t('.raid')
+      %th= t('.hardware')
+      %th= t('.cpu')
+  %tbody
+    - @families.each do |n, f|
+      %tr{ :class => cycle(:odd, :even, :name => "family") }
+        %td
+          %ul.plain
+            - f[:names].each do |node|
+              %li= link_to node[:alias], node_path(node[:handle]), :title=> node[:description]
+        %td= f[:names].length
+        %td= format_memory(f[:family][:ram])
+        %td= f[:family][:nics]
+        %td= f[:family][:drives]
+        -if options[:show].include? :raid
+          %td= f[:family][:raid]
+        %td= f[:family][:hw]
+        %td= f[:family][:cpu]
