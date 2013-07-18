@@ -1,0 +1,57 @@
+<% if @use_ssl %>
+<IfDefine SSL>
+<IfDefine !NOSSL>
+
+RewriteEngine On
+RewriteCond %{SERVER_PORT} ^80$
+RewriteRule / https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
+
+<VirtualHost *:443>
+    SSLEngine On
+    SSLCertificateFile <%= @ssl_crt_file %>
+    SSLCertificateKeyFile <%= @ssl_key_file %>
+    <% unless @ssl_crt_chain_file.nil? or @ssl_crt_chain_file.empty? %>
+    SSLCertificateChainFile <%= @ssl_crt_chain_file %>
+    <% end %>
+
+<% else %>
+<VirtualHost *:80>
+<% end %>
+    WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10 home=<%= @horizon_dir %> 
+<% if @venv -%>
+    WSGIScriptAlias / <%= @horizon_dir %>/openstack_dashboard/wsgi/django_venv.wsgi
+<% else -%>
+    WSGIScriptAlias / <%= @horizon_dir %>/openstack_dashboard/wsgi/django.wsgi
+<% end -%>
+    SetEnv APACHE_RUN_USER  <%= @user %>
+    SetEnv APACHE_RUN_GROUP <%= @group %>
+    WSGIProcessGroup horizon
+
+    DocumentRoot <%= @horizon_dir %>/.blackhole/
+    Alias /static/dashboard/js/ <%= @horizon_dir %>/static/dashboard/js/
+    Alias /static/dashboard/css/ <%= @horizon_dir %>/static/dashboard/css/
+    Alias /static <%= @horizon_dir %>/openstack_dashboard/static
+
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+
+    <Directory <%= @horizon_dir %>/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Order allow,deny
+        allow from all
+    </Directory>
+
+    ErrorLog /var/log/apache2/error.log
+    LogLevel warn
+    CustomLog /var/log/apache2/access.log combined
+</VirtualHost>
+
+WSGISocketPrefix /var/run/apache2
+
+<% if @use_ssl %>
+</IfDefine>
+</IfDefine>
+<% end %>
