@@ -47,6 +47,10 @@ During the build process the Dev Tool has to perform certain tasks which require
     # let's install some needed gems next
     sudo gem install json net-http-digest_auth kwalify bundler rake rcov rspec --no-ri --no-rdoc
 
+    # For CROWBAR 2 ONLY!  switch to Ruby 1.9 you need the following (do NOT do this for 1.x dev work!)
+    sudo update-alternatives --config ruby (to make Ruby 1.9.1 the default. ruby -v will report version 1.9.3)
+    sudo update-alternatives --config gem (to make Gem 1.9 the default, gem -v will report version 1.9)
+    sudo gem install ruby1.9.1-dev builder bluecloth
 
 #### Put the needed base ISOs in place
 As a starting point for the build process we will need the ISOs [mentioned above](#pre-requisites) placed where the Dev Toll can find them. The Dev Tool will then use them during the build process described below.
