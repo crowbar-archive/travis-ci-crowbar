@@ -128,6 +128,8 @@ node["crowbar"]["network"].keys.sort{|a,b|
     ifs[bond.name]["mode"] = team_mode
     ifs[bond.name]["type"] = "bond"
     our_iface = bond
+    node.set["crowbar"]["bond_list"] = {} if node["crowbar"]["bond_list"].nil?
+    node.set["crowbar"]["bond_list"][bond.name] = ifs[bond.name]["slaves"]
   end
   net_ifs << our_iface.name
   # If we want a vlan interface, create one on top of the base physical
@@ -146,6 +148,7 @@ node["crowbar"]["network"].keys.sort{|a,b|
     Nic.nics.each do |n|
       next unless n.kind_of?(Nic::Vlan)
       next if have_vlan_iface && n == our_iface
+      next unless n.parent == our_iface.name
       next unless n.vlan == network["vlan"].to_i
       kill_nic(n.name)
     end
