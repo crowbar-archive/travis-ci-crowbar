@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+return if node[:platform] == "windows"
+
 # Make sure packages we need will be present
 case node[:platform]
 when "ubuntu","debian","suse"
@@ -253,7 +255,7 @@ Nic.nics.each do |nic|
   # If we are a member of a bond or a bridge, then the bond or bridge
   # gets our config instead of us. The order in which Nic.nics returns
   # interfaces ensures that this will always function properly.
-  if (master = nic.bond_master || nic.bridge_master)
+  if (master = nic.master)
     if iface["slave"]
       # We should continue to be a slave.
       Chef::Log.info("#{master.name}: usurping #{nic.name}")
@@ -270,6 +272,11 @@ Nic.nics.each do |nic|
       # Skip any further configuration of this nic.
       Chef::Log.info("#{nic.name} is enslaved to #{master.name}, which was not created by Crowbar")
       Chef::Log.info("Refusing to change #{nic} configuration.")
+      # But still update "gateway" to write the right default route to
+      # the config files, otherwise things might break after a reboot
+      if default_route[:nic] == nic.name
+        ifs[nic.name]["gateway"] = default_route[:gateway]
+      end
       next
     else
       # We no longer want to be a slave.
